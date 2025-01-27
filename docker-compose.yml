@@ -1,0 +1,43 @@
+version: "3.9"
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: DockerfileFrontendIEH
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - CHOKIDAR_USEPOLLING=true # Activa polling para asegurar detección de cambios en Docker
+    container_name: frontendIEH
+    networks:
+      - redwebIEH
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: DockerfileBackendIEH
+    command: bash -c "composer install && php -S 0.0.0.0:8000 -t public"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    container_name: backendIEH
+    networks:
+      - redwebIEH
+
+  web:
+    build:
+      context: ./web
+      dockerfile: DockerfilewebIEH
+    ports:
+      - "8082:80" # Si tienes problemas con el puerto 80 cambia el puerto externo aquí
+    container_name: webIEH
+    networks:
+      - redwebIEH
+
+networks:
+  redwebIEH:
+    driver: bridge
